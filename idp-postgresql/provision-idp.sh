@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 
-VERSION=3.2.0-SNAPSHOT
+VERSION=3.2.2-SNAPSHOT
 IDP_HOME=/opt/shibboleth-idp
 
 function download() {
   echo "Downloading $1 to $2"
-  curl -fo "$2" "$1"
-  [[ $? -ne 0 ]] && echo "Artifact not found. Aborting." && exit
+  curl -sL -fo "$2" "$1"
+  if   [ "$?" -ne "0"  ]; then echo "Artifact not found. Aborting." 1>&2 ; exit -1  ; fi
 }
 
 # Downloads the latest snapshot of the given snapshot version
 function download_snapshot() {
+  echo "Downloading snapshot $SNAPSHOT_REPO/$GRP_ID/$ART_ID/$1/$ART_ID-$LATEST.$TYPE to $2"
   MD="$TMPDIR/maven-metadata.xml"
-  curl -fo "$MD" "$SNAPSHOT_REPO/$GRP_ID/$ART_ID/$1/maven-metadata.xml"
-  [[ $? -ne 0 ]] && echo "Snapshot metadata not found. Aborting." && exit
+  curl -sL -fo "$MD" "$SNAPSHOT_REPO/$GRP_ID/$ART_ID/$1/maven-metadata.xml"
+  if [ "$?" -ne "0"  ]; then echo "Snapshot metadata not found. Aborting." 1>&2 ; exit -1  ; fi
   LATEST=$(xmllint --shell "$MD" \
     <<< `echo 'cat //metadata/versioning/snapshotVersions/snapshotVersion[1]/value/text()'` \
     | grep ${VERSION%-SNAPSHOT})
@@ -57,4 +58,5 @@ echo 'export PATH="$IDP_HOME"/bin:$PATH' >> $BASHRC
 echo "export JETTY_BASE=\"$IDP_HOME/jetty-base\"" >> $BASHRC
 
 # Start IdP
+pwd
 su --login vagrant -c "jetty.sh start"

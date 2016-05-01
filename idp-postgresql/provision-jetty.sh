@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-JETTY_VERSION=9.3.3.v20150827
+JETTY_VERSION=9.3.8.v20160314
 JETTY_HOME=/opt/jetty
 TARBALL=/tmp/jetty-dist.tar.gz
 
-curl -o $TARBALL http://mirror.cc.columbia.edu/pub/software/eclipse/jetty/$JETTY_VERSION/dist/jetty-distribution-${JETTY_VERSION}.tar.gz
-pushd /tmp; tar -zxvf $TARBALL; popd
+echo "Downloading: http://mirror.cc.columbia.edu/pub/software/eclipse/jetty/$JETTY_VERSION/dist/jetty-distribution-${JETTY_VERSION}.tar.gz"
+curl -sL -fo $TARBALL http://mirror.cc.columbia.edu/pub/software/eclipse/jetty/$JETTY_VERSION/dist/jetty-distribution-${JETTY_VERSION}.tar.gz 
+if   [ "$?" -ne "0"  ]; then echo "Download failed, Aborting." 1>&2 ; exit -1  ; fi
+
+pushd /tmp; tar -zxf $TARBALL; popd
 mv /tmp/jetty-distribution-${JETTY_VERSION} $JETTY_HOME
 
 # File permissions
